@@ -16,6 +16,35 @@ const onlyIf = (value, body, params, schema) => {
     }
 };
 
+const toNamed = (params, props) => {
+    return props.reduce((accum, current, idx) => {
+        // TODO: Also account for array length if we're falling back to an array index.
+        accum[current] = params[current] || params[idx];
+
+        return accum;
+    }, {});
+}
+
+// Params will be an array of arguments, or an object of named props.
+const name = (value, body, params, schema) => {
+    // TODO: Necessary to support both named and list? Or pick one? Maybe 1 item can be without a name, but if you need multiple props, it has to be named?
+    // Use special `toNamed` function to map array props if you want to support both. (name:"Last name" OR name:(prop="Last name"))
+    const props = toNamed(params, ["prop"]);
+
+    if (!value) {
+        // TODO: Custom error types? We'll let the wrapper grab the name and stuff and add additional context.
+        throw new JValidRequired(props.prop + ' is required.');
+    }
+
+    if (typeof value !== 'string') {
+        throw new JValidType(props.prop + ' must be a string.');
+    }
+
+    if (value.length > 30) {
+        throw new JValidMaxLength(props.prop + ' cannot be greater than 30 characters.');
+    }
+}
+
 const addressLine1Error = 'Address line 1 is required please.';
 
 // Valid types are [any, string, int, dec, date].
@@ -23,13 +52,10 @@ const addressLine1Error = 'Address line 1 is required please.';
 // `Pipes` (dob: 'date|toAge|>max:60') will transform the value and pass it down the chain.
 // `Type` filters (string, string[], int, date, etc.) are special and will transform and pass it down automatically (with `typeCoercion: true` in options, otherwise it will fail right away if the type doesn't match).
 // Filters get called in order (left -> right).
-const nameRules = 'required|string|max:30';
-
-// TODO: Named parameters to filters? required:(message='hello',strict=true)
 
 const schema = {
-    firstName: nameRules,
-    lastName: nameRules,
+    firstName: 'required|string|max:30',
+    lastName: 'name:(prop="Last name")', // One custom filter for all name rules.
     dob: 'required|date',
     retirementAge: 'int|gtAge',
     address: {
@@ -58,7 +84,7 @@ const validation = jvalid.isValid(schema, request, options); // (see result belo
 const validation = {
     valid: false,
     errors: [
-        { field: 'retirementAge', filter: 'gtAge', message: 'Retirement age must be greater than current age.' },
+        { field: 'retirementAge', filter: 'gtAge', message: 'Retirement age must be greater than current age.' }, // TODO: What other pieces of info do we want? errorType?
         { field: 'address.line1', filter: 'required', message: 'Address line 1 is required please.' },
         { field: 'address.line2', filter: 'onlyIf:address.line1', message: 'Address line 1 must also be filled out.' }
     ],
