@@ -18,8 +18,10 @@ const onlyIf = (value, body, params, schema) => {
 
 const addressLine1Error = 'Address line 1 is required please.';
 
+// Valid types are [any, string, int, dec, date].
+// Any type can be used as an array (any[], string[]).
 // `Pipes` (dob: 'date|toAge|>max:60') will transform the value and pass it down the chain.
-// `Type` filters (string, int, date, etc.) are special and will transform and pass it down automatically (with `typeCoercion: true` in options, otherwise it will fail right away if the type doesn't match).
+// `Type` filters (string, string[], int, date, etc.) are special and will transform and pass it down automatically (with `typeCoercion: true` in options, otherwise it will fail right away if the type doesn't match).
 // Filters get called in order (left -> right).
 const nameRules = 'required|string|max:30';
 
