@@ -40,7 +40,7 @@ const request = {
     firstName: 'Bobby',
     lastName: 'Newport',
     dob: '03/01/1990',
-    retirementAge: '18', // Will work with `typeCoercion: true` in options
+    retirementAge: '18', // Will work with `typeCoercion: true` in options b/c Number('18') === 18.
     address: {
         line1: null,
         line2: 'Apt. 206',
@@ -63,8 +63,8 @@ const validation = {
     output: {
         firstName: 'Bobby',
         lastName: 'Newport',
-        dob: 'DATE_OBJECT',
-        retirementAge: 18,
+        dob: '[Object date]', // Notice the coercion that happened here.
+        retirementAge: 18, // Notice the coercion that happed here.
         address: {
             line1: null,
             line2: 'Apt. 206',
