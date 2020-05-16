@@ -140,57 +140,65 @@ class JValid {
     let errors = [];
     let output = {};
 
-    Object.entries(request).forEach(([key, value]) => {
-      // TODO: Support nesting objects.
-      // TODO: If additionalProps is false and we don't have a schema for it, should we include it in the output?
-      output[key] = value;
+    Object.entries(this.schema).forEach(([key, value]) => {
+      const requestValue = request[key];
 
-      debug("Validating:", `[${key}, ${value}]`);
+      debug("Validating:", `[${key}, ${requestValue}]`);
 
-      const schemaField = this.schema[key];
+      // TODO: If the value doesn't exist in the request, should we put it in the output?
+      output[key] = requestValue;
 
-      // TODO: Support nesting objects.
-      if (!this.options.additionalProperties && !schemaField) {
+      try {
+        const fieldFilters = processFilters(value);
+        debug("processing", fieldFilters);
+        const fieldResult = fieldFilters.reduce((passedValue, filter) => {
+          try {
+            debug("filter:", filter.name + ", params:", filter.params);
+
+            const result = this.filters[filter.name](
+              passedValue,
+              request,
+              filter.params,
+              key,
+              this.schema,
+              options
+            );
+
+            return filter.pipe && result ? result : passedValue;
+          } catch (err) {
+            err.filter = filter.name;
+            throw err;
+          }
+        }, requestValue);
+
+        // TODO: Support nesting objects.
+        output[key] = fieldResult;
+      } catch (err) {
         isValid = false;
-
-        errors.push({
-          field: key,
-          message: `Field '${key}' does not exist in schema and additional properties are not allowed.`,
-        });
-      }
-
-      if (schemaField) {
-        try {
-          const fieldFilters = processFilters(schemaField);
-          debug("processing", fieldFilters);
-          const fieldResult = fieldFilters.reduce((passedValue, filter) => {
-            try {
-              debug("filter:", filter.name + ", params:", filter.params);
-
-              const result = this.filters[filter.name](
-                passedValue,
-                request,
-                filter.params,
-                key,
-                this.schema,
-                options
-              );
-
-              return filter.pipe && result ? result : passedValue;
-            } catch (err) {
-              err.filter = filter.name;
-              throw err;
-            }
-          }, value);
-
-          // TODO: Support nesting objects.
-          output[key] = fieldResult;
-        } catch (err) {
-          isValid = false;
-          errors.push({ field: key, filter: err.filter, message: err.message });
-        }
+        errors.push({ field: key, filter: err.filter, message: err.message });
       }
     });
+
+    // TODO: Additional props
+    // Object.entries(request).forEach(([key, value]) => {
+    //   // TODO: If additionalProps is false and we don't have a schema for it, should we include it in the output?
+    //   output[key] = value;
+
+    //   const schemaField = this.schema[key];
+
+    //   // TODO: Support nesting objects.
+    //   if (!this.options.additionalProperties && !schemaField) {
+    //     isValid = false;
+
+    //     errors.push({
+    //       field: key,
+    //       message: `Field '${key}' does not exist in schema and additional properties are not allowed.`,
+    //     });
+    //   }
+
+    //   if (schemaField) {
+    //   }
+    // });
 
     return { valid: isValid, errors, output };
   }
