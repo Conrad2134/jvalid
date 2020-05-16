@@ -62,6 +62,12 @@ module.exports.filters = {
     if (typeof value === "number" && value > params[0]) {
       throw new Error(`${field} must be less than ${params[0]}.`);
     }
+
+    if (Array.isArray(value) && value.length > params[0]) {
+      throw new Error(
+        `${field} must be less than ${params[0]} items in length.`
+      );
+    }
   },
 };
 
@@ -76,10 +82,7 @@ module.exports.processFilters = (filters) => {
     let [name, rawParams] = filter.split(":");
     const params = rawParams ? rawParams.split(",") : [];
     let pipe = false;
-
-    if (typeFilters.includes(name)) {
-      pipe = true;
-    }
+    let array = false;
 
     if (name.startsWith(">")) {
       // Previous filter should pipe to this one.
@@ -87,7 +90,16 @@ module.exports.processFilters = (filters) => {
       name = name.slice(1);
     }
 
-    processed.push({ name, params, pipe });
+    if (name.endsWith("[]")) {
+      array = true;
+      name = name.slice(0, name.length - 2);
+    }
+
+    if (typeFilters.includes(name)) {
+      pipe = true;
+    }
+
+    processed.push({ name, params, pipe, array });
   });
 
   return processed;

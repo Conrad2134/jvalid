@@ -346,7 +346,122 @@ describe("Built-in validations", () => {
     });
   });
 
-  test.todo("arrays, everything");
+  test("simple validation, array, passing", () => {
+    const schema = {
+      numbers: "number[]",
+    };
+
+    const body = {
+      numbers: [1, 2, 3],
+    };
+
+    const validator = new JValid(schema);
+    const result = validator.validate(body);
+
+    expect(result.valid).toStrictEqual(true);
+    expect(result.errors).toHaveLength(0);
+    expect(result.output).toStrictEqual(body);
+  });
+
+  test("simple validation, array, failing, item value type", () => {
+    const schema = {
+      numbers: "number[]",
+    };
+
+    const body = {
+      numbers: [1, 2, "three"],
+    };
+
+    const validator = new JValid(schema);
+    const result = validator.validate(body);
+
+    expect(result.valid).toStrictEqual(false);
+    expect(result.errors).toHaveLength(1);
+    expect(result.errors[0]).toStrictEqual({
+      field: "numbers",
+      filter: "number",
+      message: "Could not coerce numbers[2] value into a number.",
+    });
+    expect(result.output).toStrictEqual(body);
+  });
+
+  test("Array item value type coercion", () => {
+    const schema = {
+      numbers: "number[]",
+    };
+
+    const body = {
+      numbers: [1, 2, "3"],
+    };
+
+    const validator = new JValid(schema, { typeCoercion: true });
+    const result = validator.validate(body);
+
+    expect(result.valid).toStrictEqual(true);
+    expect(result.errors).toHaveLength(0);
+    expect(result.output).toStrictEqual({ numbers: [1, 2, 3] });
+  });
+
+  test("Non-type validation, array, passing", () => {
+    const schema = {
+      numbers: "max[]:30",
+    };
+
+    const body = {
+      numbers: [1, 2, 3],
+    };
+
+    const validator = new JValid(schema);
+    const result = validator.validate(body);
+
+    expect(result.valid).toStrictEqual(true);
+    expect(result.errors).toHaveLength(0);
+    expect(result.output).toStrictEqual(body);
+  });
+
+  test("Non-type validation, array, failing", () => {
+    const schema = {
+      numbers: "max[]:30",
+    };
+
+    const body = {
+      numbers: [1, 2, 33],
+    };
+
+    const validator = new JValid(schema);
+    const result = validator.validate(body);
+
+    expect(result.valid).toStrictEqual(false);
+    expect(result.errors).toHaveLength(1);
+    expect(result.errors[0]).toStrictEqual({
+      field: "numbers",
+      filter: "max",
+      message: "numbers[2] must be less than 30.",
+    });
+    expect(result.output).toStrictEqual(body);
+  });
+
+  test("simple validation, array, failing, value type is not array", () => {
+    const schema = {
+      numbers: "number[]",
+    };
+
+    const body = {
+      numbers: 1,
+    };
+
+    const validator = new JValid(schema);
+    const result = validator.validate(body);
+
+    expect(result.valid).toStrictEqual(false);
+    expect(result.errors).toHaveLength(1);
+    expect(result.errors[0]).toStrictEqual({
+      field: "numbers",
+      filter: "number",
+      message: "Field numbers is not an array.",
+    });
+    expect(result.output).toStrictEqual(body);
+  });
   test.todo("individual test for each built-in filter");
   test.todo("error types");
 });

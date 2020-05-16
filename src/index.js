@@ -8,7 +8,8 @@ const { filters: jValidFilters, processFilters } = require("./filters");
 const setValue = require("set-value");
 const getValue = require("get-value");
 
-const buildPath = (path, key) => (path ? `${path}.${key}` : key);
+const buildPath = (path, key, isIndex) =>
+  path ? `${path}${isIndex ? `[${key}]` : `.${key}`}` : key;
 
 const defaultOptions = {
   additionalProperties: false,
@@ -92,6 +93,38 @@ class JValid {
         const fieldResult = fieldFilters.reduce((passedValue, filter) => {
           try {
             debug("filter:", filter.name + ", params:", filter.params);
+
+            if (filter.array) {
+              if (!Array.isArray(passedValue)) {
+                throw new JValidTypeError(
+                  `${filter.name}[]`,
+                  `Field ${keyPath} is not an array.`
+                );
+              }
+
+              // Apply the filter to each item in the array.
+              const result = passedValue.reduce((accum, val, index) => {
+                const arrayKeyPath = buildPath(keyPath, index, true);
+                const arrayItemResult = this.filters[filter.name](
+                  val,
+                  request,
+                  filter.params,
+                  arrayKeyPath,
+                  schema,
+                  this.options
+                );
+
+                if (filter.pipe && arrayItemResult) {
+                  accum.push(arrayItemResult);
+                } else {
+                  accum.push(val);
+                }
+
+                return accum;
+              }, []);
+
+              return filter.pipe && result.length ? result : passedValue;
+            }
 
             const result = this.filters[filter.name](
               passedValue,
