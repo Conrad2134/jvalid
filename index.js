@@ -17,6 +17,8 @@ class JValidFilterConflictError extends Error {
   }
 }
 
+const typeFilters = ["string", "number"];
+
 const jValidFilters = {
   required: (value, body, params, field, schema, options) => {
     if (!value) {
@@ -80,6 +82,30 @@ const defaultOptions = {
   typeCoercion: true,
 };
 
+const processFilters = (filters) => {
+  const processed = [];
+
+  filters.split("|").forEach((filter, index) => {
+    let [name, rawParams] = filter.split(":");
+    const params = rawParams ? rawParams.split(",") : [];
+    let pipe = false;
+
+    if (typeFilters.includes(name)) {
+      pipe = true;
+    }
+
+    if (name.startsWith(">")) {
+      // Previous filter should pipe to this one.
+      processed[index - 1].pipe = true;
+      name = name.slice(1);
+    }
+
+    processed.push({ name, params, pipe });
+  });
+
+  return processed;
+};
+
 class JValid {
   filters = jValidFilters;
 
@@ -103,8 +129,13 @@ class JValid {
   isValid(request) {
     let isValid = true;
     let errors = [];
+    let output = {};
 
     Object.entries(request).forEach(([key, value]) => {
+      // TODO: Support nesting objects.
+      // TODO: If additionalProps is false and we don't have a schema for it, should we include it in the output?
+      output[key] = value;
+
       console.log("Validating:", `[${key}, ${value}]`);
 
       const schemaField = this.schema[key];
@@ -120,32 +151,31 @@ class JValid {
       }
 
       if (schemaField) {
-        const fieldFilters = schemaField.split("|");
-
         try {
+          const fieldFilters = processFilters(schemaField);
           console.log("processing", fieldFilters);
-          fieldFilters.reduce((passedValue, filter) => {
+          const fieldResult = fieldFilters.reduce((passedValue, filter) => {
             try {
-              const [filterName, filterParams] = filter.split(":");
+              console.log("filter:", filter.name + ", params:", filter.params);
 
-              console.log("filter:", filterName + ", params:", filterParams);
-
-              return (
-                // TODO: If filter returns a value, we continue to pass that value along. Should we make it explicit (pipes?) or options?
-                this.filters[filterName](
-                  passedValue,
-                  request,
-                  filterParams ? filterParams.split(",") : [],
-                  key,
-                  schema,
-                  options
-                ) || passedValue
+              const result = this.filters[filter.name](
+                passedValue,
+                request,
+                filter.params,
+                key,
+                schema,
+                options
               );
+
+              return filter.pipe && result ? result : passedValue;
             } catch (err) {
-              err.filter = filter;
+              err.filter = filter.name;
               throw err;
             }
           }, value);
+
+          // TODO: Support nesting objects.
+          output[key] = fieldResult;
         } catch (err) {
           isValid = false;
           errors.push({ field: key, filter: err.filter, message: err.message });
@@ -153,7 +183,7 @@ class JValid {
       }
     });
 
-    return { valid: isValid, errors };
+    return { valid: isValid, errors, output };
   }
 }
 
@@ -186,8 +216,14 @@ const request = {
   additionalProp: "fake",
 };
 
+// const request = {
+//   firstName: "Bobby",
+//   lastName: "Newport",
+//   age: 33,
+// };
+
 const options = {
-  typeCoercion: false,
+  typeCoercion: true,
 };
 
 const validator = new JValid(schema, options);
