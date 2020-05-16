@@ -31,6 +31,7 @@ describe("Built-in validations", () => {
     const result = validator.validate(body);
 
     expect(result.valid).toStrictEqual(false);
+    // TODO: Assert errors?
     expect(result.errors).toHaveLength(1);
     expect(result.output).toEqual(body);
   });
@@ -71,12 +72,83 @@ describe("Built-in validations", () => {
     const result = validator.validate(body);
 
     expect(result.valid).toStrictEqual(false);
+    // TODO: Assert errors?
     expect(result.errors).toHaveLength(3);
     expect(result.output).toEqual(body);
   });
 
-  test.todo("additional properties");
-  test.todo("type coercion");
+  test("Additional properties fails validation, not included in output", () => {
+    const schema = {
+      name: "string|required",
+    };
+
+    const body = {
+      name: "Michael Gary Scott",
+      age: 50,
+    };
+
+    const validator = new JValid(schema, { additionalProperties: false });
+    const result = validator.validate(body);
+
+    expect(result.valid).toStrictEqual(false);
+    // TODO: Assert errors?
+    expect(result.errors).toHaveLength(1);
+    expect(result.output).toEqual({ name: body.name });
+  });
+
+  test("Additional properties allowed, included in output", () => {
+    const schema = {
+      name: "string|required",
+    };
+
+    const body = {
+      name: "Michael Gary Scott",
+      age: 50,
+    };
+
+    const validator = new JValid(schema, { additionalProperties: true });
+    const result = validator.validate(body);
+
+    expect(result.valid).toStrictEqual(true);
+    expect(result.errors).toHaveLength(0);
+    expect(result.output).toEqual(body);
+  });
+
+  test("Type coercion - off fails validation", () => {
+    const schema = {
+      age: "number|required",
+    };
+
+    const body = {
+      age: "50",
+    };
+
+    const validator = new JValid(schema, { typeCoercion: false });
+    const result = validator.validate(body);
+
+    expect(result.valid).toStrictEqual(false);
+    // TODO: Assert errors?
+    expect(result.errors).toHaveLength(1);
+    expect(result.output).toEqual(body);
+  });
+
+  test("Type coercion - on coerces values", () => {
+    const schema = {
+      age: "number|required",
+    };
+
+    const body = {
+      age: "50",
+    };
+
+    const validator = new JValid(schema, { typeCoercion: true });
+    const result = validator.validate(body);
+
+    expect(result.valid).toStrictEqual(true);
+    expect(result.errors).toHaveLength(0);
+    expect(result.output).toEqual({ age: 50 });
+  });
+
   test.todo("individual test for each built-in filter");
   test.todo("custom filters");
   test.todo("error types");

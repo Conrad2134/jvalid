@@ -36,6 +36,24 @@ class JValid {
     let errors = [];
     let output = {};
 
+    // TODO: Ideally we wouldn't have to look twice through - can we combine the schema and request body?
+
+    // First check for additional properties if they're not allowed
+    // TODO: Support nested objects.
+    Object.entries(request).forEach(([key, value]) => {
+      if (!this.options.additionalProperties && !this.schema[key]) {
+        isValid = false;
+
+        errors.push({
+          field: key,
+          message: `Field '${key}' does not exist in schema and additional properties are not allowed.`,
+        });
+      } else {
+        output[key] = value;
+      }
+    });
+
+    // Iterate through the schema and validate everything.
     Object.entries(this.schema).forEach(([key, value]) => {
       const requestValue = request[key];
 
@@ -74,27 +92,6 @@ class JValid {
         errors.push({ field: key, filter: err.filter, message: err.message });
       }
     });
-
-    // TODO: Additional props
-    // Object.entries(request).forEach(([key, value]) => {
-    //   // TODO: If additionalProps is false and we don't have a schema for it, should we include it in the output?
-    //   output[key] = value;
-
-    //   const schemaField = this.schema[key];
-
-    //   // TODO: Support nesting objects.
-    //   if (!this.options.additionalProperties && !schemaField) {
-    //     isValid = false;
-
-    //     errors.push({
-    //       field: key,
-    //       message: `Field '${key}' does not exist in schema and additional properties are not allowed.`,
-    //     });
-    //   }
-
-    //   if (schemaField) {
-    //   }
-    // });
 
     return { valid: isValid, errors, output };
   }
