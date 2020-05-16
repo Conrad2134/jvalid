@@ -78,4 +78,6 @@ describe("Built-in validations", () => {
   test.todo("additional properties");
   test.todo("type coercion");
   test.todo("individual test for each built-in filter");
+  test.todo("custom filters");
+  test.todo("error types");
 });
