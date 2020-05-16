@@ -1,3 +1,5 @@
+const debug = require("debug")("jvalid");
+
 class JValidRequiredError extends Error {
   constructor(fieldName) {
     super(`${fieldName} is required.`);
@@ -50,7 +52,14 @@ const jValidFilters = {
 
     if (options.typeCoercion) {
       try {
-        return parseInt(value, 10);
+        const result = parseInt(value, 10);
+
+        if (Number.isNaN(result)) {
+          // Will get caught below.
+          throw result;
+        }
+
+        return result;
       } catch (ex) {
         throw new JValidTypeError(
           "number",
@@ -109,7 +118,7 @@ const processFilters = (filters) => {
 class JValid {
   filters = jValidFilters;
 
-  constructor(schema, options) {
+  constructor(schema, options = {}) {
     this.schema = schema;
     this.options = { ...defaultOptions, ...options };
   }
@@ -136,7 +145,7 @@ class JValid {
       // TODO: If additionalProps is false and we don't have a schema for it, should we include it in the output?
       output[key] = value;
 
-      console.log("Validating:", `[${key}, ${value}]`);
+      debug("Validating:", `[${key}, ${value}]`);
 
       const schemaField = this.schema[key];
 
@@ -153,17 +162,17 @@ class JValid {
       if (schemaField) {
         try {
           const fieldFilters = processFilters(schemaField);
-          console.log("processing", fieldFilters);
+          debug("processing", fieldFilters);
           const fieldResult = fieldFilters.reduce((passedValue, filter) => {
             try {
-              console.log("filter:", filter.name + ", params:", filter.params);
+              debug("filter:", filter.name + ", params:", filter.params);
 
               const result = this.filters[filter.name](
                 passedValue,
                 request,
                 filter.params,
                 key,
-                schema,
+                this.schema,
                 options
               );
 
@@ -203,36 +212,12 @@ const nameFilter = (value, body, params, field, schema, options) => {
   }
 };
 
-const schema = {
-  firstName: "string|required|max:30",
-  lastName: "name",
-  age: "number|required",
-};
-
-const request = {
-  firstName: "Bobbyreallylongnamewhichisover30characters",
-  lastName: "Newport",
-  age: "33",
-  additionalProp: "fake",
-};
-
-// const request = {
-//   firstName: "Bobby",
-//   lastName: "Newport",
-//   age: 33,
-// };
-
 const options = {
   typeCoercion: true,
 };
 
-const validator = new JValid(schema, options);
-
-// TODO: Could we add options (like `autoPipe`) to our filters when they are initialized?
-// TODO: Would have to store them as objects with properties and a filter prop (which is the actual function).
-// TODO: Maybe a v2 thing.
-validator.registerFilter("name", nameFilter);
-
-const result = validator.validate(request);
-
-console.log(result.valid ? "Hooray!" : result);
+module.exports = {
+  JValid,
+  JValidTypeError,
+  JValidRequiredError,
+};
