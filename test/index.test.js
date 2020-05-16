@@ -1,4 +1,5 @@
 const { JValid } = require("../src/index");
+const { JValidFilterConflictError } = require("../src/errors");
 
 describe("Built-in validations", () => {
   test("Single property - passing", () => {
@@ -149,7 +150,65 @@ describe("Built-in validations", () => {
     expect(result.output).toEqual({ age: 50 });
   });
 
+  test("custom filter", () => {
+    const options = {
+      typeCoercion: false,
+      additionalProperties: false,
+    };
+
+    const schema = {
+      passing: "passing",
+      failing: "failing",
+    };
+
+    const body = {
+      passing: 50,
+      failing: 60,
+    };
+
+    const passingFilter = (
+      value,
+      filterBody,
+      params,
+      field,
+      validatorSchema,
+      validatorOptions
+    ) => {
+      expect(value).toStrictEqual(body.passing);
+      expect(filterBody).toEqual(body);
+      expect(params).toEqual([]);
+      expect(field).toStrictEqual("passing");
+      expect(validatorSchema).toEqual(schema);
+      expect(validatorOptions).toEqual(options);
+    };
+
+    const failingFilter = (value, body, params, field, schema, options) => {
+      throw new Error("failed");
+    };
+
+    const validator = new JValid(schema, options);
+
+    validator.registerFilters([
+      { name: "passing", filter: passingFilter },
+      { name: "failing", filter: failingFilter },
+    ]);
+
+    const result = validator.validate(body);
+
+    expect(result.valid).toStrictEqual(false);
+    // TODO: Assert errors?
+    expect(result.errors).toHaveLength(1);
+    expect(result.output).toEqual(body);
+  });
+
+  test("Custom filter conflict", () => {
+    const validator = new JValid({});
+
+    expect(() => validator.registerFilter("required")).toThrow(
+      JValidFilterConflictError
+    );
+  });
+
   test.todo("individual test for each built-in filter");
-  test.todo("custom filters");
   test.todo("error types");
 });
