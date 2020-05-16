@@ -404,6 +404,8 @@ describe("Built-in validations", () => {
 
   test("Non-type validation, array, passing", () => {
     const schema = {
+      // TODO: Document potential gotcha. If you omit the [], you're checking length of the array and not each item.
+      // TODO: It's pretty sweet though that you can apply the [] syntax to any filter.
       numbers: "max[]:30",
     };
 
@@ -464,4 +466,8 @@ describe("Built-in validations", () => {
   });
   test.todo("individual test for each built-in filter");
   test.todo("error types");
+  test.todo("multiple params for filters");
+  test.todo(
+    "named params? if we want to do that for v1. At least think about the api and if it would be breaking"
+  );
 });
