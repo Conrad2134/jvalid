@@ -5,6 +5,10 @@ const {
   JValidFilterConflictError,
 } = require("./errors");
 const { filters: jValidFilters, processFilters } = require("./filters");
+const setValue = require("set-value");
+const getValue = require("get-value");
+
+const buildPath = (path, key) => (path ? `${path}.${key}` : key);
 
 const defaultOptions = {
   additionalProperties: false,
@@ -31,7 +35,7 @@ class JValid {
     this.filters[name] = filter;
   }
 
-  validate(request) {
+  _validate(schema, request, path = "") {
     let isValid = true;
     let errors = [];
     let output = {};
@@ -39,28 +43,48 @@ class JValid {
     // TODO: Ideally we wouldn't have to look twice through - can we combine the schema and request body?
 
     // First check for additional properties if they're not allowed
-    // TODO: Support nested objects.
     Object.entries(request).forEach(([key, value]) => {
-      if (!this.options.additionalProperties && !this.schema[key]) {
+      const keyPath = buildPath(path, key);
+
+      if (!this.options.additionalProperties && !schema[key]) {
         isValid = false;
 
         errors.push({
-          field: key,
-          message: `Field '${key}' does not exist in schema and additional properties are not allowed.`,
+          field: keyPath,
+          message: `Field '${keyPath}' does not exist in schema and additional properties are not allowed.`,
         });
       } else {
-        output[key] = value;
+        setValue(output, key, value);
       }
     });
 
     // Iterate through the schema and validate everything.
-    Object.entries(this.schema).forEach(([key, value]) => {
+    Object.entries(schema).forEach(([key, value]) => {
       const requestValue = request[key];
+      const keyPath = buildPath(path, key);
 
-      debug("Validating:", `[${key}, ${requestValue}]`);
+      // If it's an object, we're nested.
+      if (
+        typeof requestValue === "object" &&
+        requestValue !== null &&
+        typeof requestValue.length === "undefined"
+      ) {
+        const result = this._validate(value, requestValue, keyPath);
 
-      // TODO: If the value doesn't exist in the request, should we put it in the output?
-      output[key] = requestValue;
+        isValid = isValid && result.valid;
+        errors = errors.concat(result.errors);
+        setValue(output, key, result.output);
+
+        // Move on to the next one.
+        return;
+      }
+
+      debug("Validating:", `[${keyPath}, ${requestValue}]`);
+
+      if (getValue(request, keyPath)) {
+        // Only set the value if it exists in the request.
+        setValue(output, key, requestValue);
+      }
 
       try {
         const fieldFilters = processFilters(value);
@@ -73,8 +97,8 @@ class JValid {
               passedValue,
               request,
               filter.params,
-              key,
-              this.schema,
+              keyPath,
+              schema,
               this.options
             );
 
@@ -85,15 +109,25 @@ class JValid {
           }
         }, requestValue);
 
-        // TODO: Support nesting objects.
-        output[key] = fieldResult;
+        if (getValue(request, keyPath)) {
+          // Only set the value if it exists in the request.
+          setValue(output, key, fieldResult);
+        }
       } catch (err) {
         isValid = false;
-        errors.push({ field: key, filter: err.filter, message: err.message });
+        errors.push({
+          field: keyPath,
+          filter: err.filter,
+          message: err.message,
+        });
       }
     });
 
     return { valid: isValid, errors, output };
+  }
+
+  validate(request) {
+    return this._validate(this.schema, request);
   }
 }
 

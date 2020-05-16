@@ -16,7 +16,7 @@ describe("Built-in validations", () => {
 
     expect(result.valid).toStrictEqual(true);
     expect(result.errors).toHaveLength(0);
-    expect(result.output).toEqual(body);
+    expect(result.output).toStrictEqual(body);
   });
 
   test("Single property - failing", () => {
@@ -34,7 +34,7 @@ describe("Built-in validations", () => {
     expect(result.valid).toStrictEqual(false);
     // TODO: Assert errors?
     expect(result.errors).toHaveLength(1);
-    expect(result.output).toEqual(body);
+    expect(result.output).toStrictEqual(body);
   });
 
   test("Multiple properties, multiple filters - passing", () => {
@@ -54,7 +54,7 @@ describe("Built-in validations", () => {
 
     expect(result.valid).toStrictEqual(true);
     expect(result.errors).toHaveLength(0);
-    expect(result.output).toEqual(body);
+    expect(result.output).toStrictEqual(body);
   });
 
   test("Multiple properties, multiple filters - failing", () => {
@@ -75,7 +75,7 @@ describe("Built-in validations", () => {
     expect(result.valid).toStrictEqual(false);
     // TODO: Assert errors?
     expect(result.errors).toHaveLength(3);
-    expect(result.output).toEqual(body);
+    expect(result.output).toStrictEqual(body);
   });
 
   test("Additional properties fails validation, not included in output", () => {
@@ -94,7 +94,7 @@ describe("Built-in validations", () => {
     expect(result.valid).toStrictEqual(false);
     // TODO: Assert errors?
     expect(result.errors).toHaveLength(1);
-    expect(result.output).toEqual({ name: body.name });
+    expect(result.output).toStrictEqual({ name: body.name });
   });
 
   test("Additional properties allowed, included in output", () => {
@@ -112,7 +112,7 @@ describe("Built-in validations", () => {
 
     expect(result.valid).toStrictEqual(true);
     expect(result.errors).toHaveLength(0);
-    expect(result.output).toEqual(body);
+    expect(result.output).toStrictEqual(body);
   });
 
   test("Type coercion - off fails validation", () => {
@@ -130,7 +130,7 @@ describe("Built-in validations", () => {
     expect(result.valid).toStrictEqual(false);
     // TODO: Assert errors?
     expect(result.errors).toHaveLength(1);
-    expect(result.output).toEqual(body);
+    expect(result.output).toStrictEqual(body);
   });
 
   test("Type coercion - on coerces values", () => {
@@ -147,7 +147,7 @@ describe("Built-in validations", () => {
 
     expect(result.valid).toStrictEqual(true);
     expect(result.errors).toHaveLength(0);
-    expect(result.output).toEqual({ age: 50 });
+    expect(result.output).toStrictEqual({ age: 50 });
   });
 
   test("custom filter", () => {
@@ -175,11 +175,11 @@ describe("Built-in validations", () => {
       validatorOptions
     ) => {
       expect(value).toStrictEqual(body.passing);
-      expect(filterBody).toEqual(body);
-      expect(params).toEqual([]);
+      expect(filterBody).toStrictEqual(body);
+      expect(params).toStrictEqual([]);
       expect(field).toStrictEqual("passing");
-      expect(validatorSchema).toEqual(schema);
-      expect(validatorOptions).toEqual(options);
+      expect(validatorSchema).toStrictEqual(schema);
+      expect(validatorOptions).toStrictEqual(options);
     };
 
     const failingFilter = (value, body, params, field, schema, options) => {
@@ -198,7 +198,7 @@ describe("Built-in validations", () => {
     expect(result.valid).toStrictEqual(false);
     // TODO: Assert errors?
     expect(result.errors).toHaveLength(1);
-    expect(result.output).toEqual(body);
+    expect(result.output).toStrictEqual(body);
   });
 
   test("Custom filter conflict", () => {
@@ -209,6 +209,144 @@ describe("Built-in validations", () => {
     );
   });
 
+  test("Simple validation, nested object, passing", () => {
+    const schema = {
+      name: {
+        first: "string",
+      },
+    };
+
+    const body = {
+      name: {
+        first: "Michael",
+      },
+    };
+
+    const validator = new JValid(schema);
+    const result = validator.validate(body);
+
+    expect(result.valid).toStrictEqual(true);
+    expect(result.errors).toHaveLength(0);
+    expect(result.output).toStrictEqual(body);
+  });
+
+  test("Simple validation, deeply nested object, passing", () => {
+    const schema = {
+      request: {
+        name: {
+          first: "string",
+        },
+      },
+    };
+
+    const body = {
+      request: {
+        name: {
+          first: "Michael",
+        },
+      },
+    };
+
+    const validator = new JValid(schema);
+    const result = validator.validate(body);
+
+    expect(result.valid).toStrictEqual(true);
+    expect(result.errors).toHaveLength(0);
+    expect(result.output).toStrictEqual(body);
+  });
+
+  test("Simple validation, nested object, failing", () => {
+    const schema = {
+      name: {
+        first: "number",
+      },
+    };
+
+    const body = {
+      name: {
+        first: "Michael",
+      },
+    };
+
+    const validator = new JValid(schema);
+    const result = validator.validate(body);
+
+    expect(result.valid).toStrictEqual(false);
+    expect(result.errors).toHaveLength(1);
+    expect(result.errors[0]).toStrictEqual({
+      field: "name.first",
+      filter: "number",
+      message: "Could not coerce name.first value into a number.",
+    });
+    expect(result.output).toStrictEqual(body);
+  });
+
+  test("Simple validation, deeply nested object, failing", () => {
+    const schema = {
+      request: {
+        name: {
+          first: "number",
+        },
+      },
+    };
+
+    const body = {
+      request: {
+        name: {
+          first: "Michael",
+        },
+      },
+    };
+
+    const validator = new JValid(schema);
+    const result = validator.validate(body);
+
+    expect(result.valid).toStrictEqual(false);
+    expect(result.errors).toHaveLength(1);
+    expect(result.errors[0]).toStrictEqual({
+      field: "request.name.first",
+      filter: "number",
+      message: "Could not coerce request.name.first value into a number.",
+    });
+    expect(result.output).toStrictEqual(body);
+  });
+
+  test("Simple validation, deeply nested object, additonal properties, failing", () => {
+    const schema = {
+      request: {
+        name: {
+          first: "string",
+        },
+      },
+    };
+
+    const body = {
+      request: {
+        name: {
+          first: "Michael",
+          last: "Scott",
+        },
+        age: "50",
+      },
+      extra: "prop",
+    };
+
+    const validator = new JValid(schema, { additionalProperties: false });
+    const result = validator.validate(body);
+
+    expect(result.valid).toStrictEqual(false);
+    expect(result.errors).toHaveLength(3);
+    expect(result.errors[2]).toStrictEqual({
+      field: "request.name.last",
+      message:
+        "Field 'request.name.last' does not exist in schema and additional properties are not allowed.",
+    });
+    expect(result.output).toStrictEqual({
+      request: { name: { first: body.request.name.first } },
+    });
+  });
+
+  test.todo("arrays, everything");
   test.todo("individual test for each built-in filter");
   test.todo("error types");
 });
