@@ -2,12 +2,13 @@ const { JValidRequiredError, JValidTypeError } = require("./errors");
 
 module.exports.filters = {
   required: (value, body, params, field, schema, options) => {
-    if (!value) {
+    if (!value && value !== 0) {
       throw new JValidRequiredError(field);
     }
   },
 
   string: (value, body, params, field, schema, options) => {
+    // TODO: Should we return empty string here since this filter auto-pipes or is this fine?
     if (!value && value !== 0) return;
 
     if (options.typeCoercion) {

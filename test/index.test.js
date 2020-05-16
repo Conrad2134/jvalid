@@ -464,9 +464,10 @@ describe("Built-in validations", () => {
     });
     expect(result.output).toStrictEqual(body);
   });
-  test.todo("individual test for each built-in filter");
+
   test.todo("error types");
   test.todo("multiple params for filters");
+  test.todo("pipe operator");
   test.todo(
     "named params? if we want to do that for v1. At least think about the api and if it would be breaking"
   );
