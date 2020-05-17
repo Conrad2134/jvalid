@@ -1,107 +1,107 @@
-const { JValidRequiredError, JValidTypeError } = require("./errors");
+const { JValidRequiredError, JValidTypeError } = require('./errors');
 
 module.exports.filters = {
-  required: (value, body, params, field, schema, options) => {
-    if (!value && value !== 0) {
-      throw new JValidRequiredError(field);
-    }
-  },
+	required: (value, body, params, field, schema, options) => {
+		if (!value && value !== 0) {
+			throw new JValidRequiredError(field);
+		}
+	},
 
-  string: (value, body, params, field, schema, options) => {
-    // TODO: Should we return empty string here since this filter auto-pipes or is this fine?
-    if (!value && value !== 0) return;
+	string: (value, body, params, field, schema, options) => {
+		// TODO: Should we return empty string here since this filter auto-pipes or is this fine?
+		if (!value && value !== 0) return;
 
-    if (options.typeCoercion) {
-      try {
-        return value.toString();
-      } catch (ex) {
-        throw new JValidTypeError(
-          "string",
-          `Could not coerce ${field} value into a string.`
-        );
-      }
-    }
+		if (options.typeCoercion) {
+			try {
+				return value.toString();
+			} catch (ex) {
+				throw new JValidTypeError(
+					'string',
+					`Could not coerce ${field} value into a string.`
+				);
+			}
+		}
 
-    if (typeof value !== "string") {
-      throw new JValidTypeError("string", `${field} must be a string.`);
-    }
-  },
+		if (typeof value !== 'string') {
+			throw new JValidTypeError('string', `${field} must be a string.`);
+		}
+	},
 
-  number: (value, body, params, field, schema, options) => {
-    if (!value && !Number.isNaN(value)) return;
+	number: (value, body, params, field, schema, options) => {
+		if (!value && !Number.isNaN(value)) return;
 
-    if (options.typeCoercion) {
-      try {
-        const result = parseInt(value, 10);
+		if (options.typeCoercion) {
+			try {
+				const result = parseInt(value, 10);
 
-        if (Number.isNaN(result)) {
-          // Will get caught below.
-          throw result;
-        }
+				if (Number.isNaN(result)) {
+					// Will get caught below.
+					throw result;
+				}
 
-        return result;
-      } catch (ex) {
-        throw new JValidTypeError(
-          "number",
-          `Could not coerce ${field} value into a number.`
-        );
-      }
-    }
+				return result;
+			} catch (ex) {
+				throw new JValidTypeError(
+					'number',
+					`Could not coerce ${field} value into a number.`
+				);
+			}
+		}
 
-    if (typeof value !== "number" || Number.isNaN(value)) {
-      throw new JValidTypeError("number", `${field} must be a number.`);
-    }
-  },
+		if (typeof value !== 'number' || Number.isNaN(value)) {
+			throw new JValidTypeError('number', `${field} must be a number.`);
+		}
+	},
 
-  max: (value, body, params, field, schema, options) => {
-    if (typeof value === "string" && value.length > params[0]) {
-      throw new Error(
-        `${field} must be less than ${params[0]} characters in length.`
-      );
-    }
+	max: (value, body, params, field, schema, options) => {
+		if (typeof value === 'string' && value.length > params[0]) {
+			throw new Error(
+				`${field} must be less than ${params[0]} characters in length.`
+			);
+		}
 
-    if (typeof value === "number" && value > params[0]) {
-      throw new Error(`${field} must be less than ${params[0]}.`);
-    }
+		if (typeof value === 'number' && value > params[0]) {
+			throw new Error(`${field} must be less than ${params[0]}.`);
+		}
 
-    if (Array.isArray(value) && value.length > params[0]) {
-      throw new Error(
-        `${field} must be less than ${params[0]} items in length.`
-      );
-    }
-  },
+		if (Array.isArray(value) && value.length > params[0]) {
+			throw new Error(
+				`${field} must be less than ${params[0]} items in length.`
+			);
+		}
+	},
 };
 
-const typeFilters = ["string", "number"];
+const typeFilters = ['string', 'number'];
 
 module.exports.typeFilters = typeFilters;
 
 module.exports.processFilters = (filters) => {
-  const processed = [];
+	const processed = [];
 
-  filters.split("|").forEach((filter, index) => {
-    let [name, rawParams] = filter.split(":");
-    const params = rawParams ? rawParams.split(",") : [];
-    let pipe = false;
-    let array = false;
+	filters.split('|').forEach((filter, index) => {
+		let [name, rawParams] = filter.split(':');
+		const params = rawParams ? rawParams.split(',') : [];
+		let pipe = false;
+		let array = false;
 
-    if (name.startsWith(">")) {
-      // Previous filter should pipe to this one.
-      processed[index - 1].pipe = true;
-      name = name.slice(1);
-    }
+		if (name.startsWith('>')) {
+			// Previous filter should pipe to this one.
+			processed[index - 1].pipe = true;
+			name = name.slice(1);
+		}
 
-    if (name.endsWith("[]")) {
-      array = true;
-      name = name.slice(0, name.length - 2);
-    }
+		if (name.endsWith('[]')) {
+			array = true;
+			name = name.slice(0, name.length - 2);
+		}
 
-    if (typeFilters.includes(name)) {
-      pipe = true;
-    }
+		if (typeFilters.includes(name)) {
+			pipe = true;
+		}
 
-    processed.push({ name, params, pipe, array });
-  });
+		processed.push({ name, params, pipe, array });
+	});
 
-  return processed;
+	return processed;
 };
