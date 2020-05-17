@@ -103,7 +103,7 @@ class JValid {
 							if (!Array.isArray(passedValue)) {
 								throw new JValidTypeError(
 									`${filter.name}[]`,
-									`Field ${keyPath} is not an array.`
+									`Field ${keyPath} must be an array.`
 								);
 							}
 

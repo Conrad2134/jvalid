@@ -8,6 +8,7 @@ module.exports.filters = {
 	},
 
 	string: (value, body, params, field, schema, options) => {
+		// TODO: Should we handle NaN here?
 		// TODO: Should we return empty string here since this filter auto-pipes or is this fine?
 		if (!value && value !== 0) return;
 
@@ -27,12 +28,31 @@ module.exports.filters = {
 		}
 	},
 
+	array: (value, body, params, field, schema, options) => {
+		// TODO: Should we handle NaN here?
+		if (!value && value !== 0 && !Number.isNaN(value)) return;
+
+		// TODO: Could we handle CSV, single values if type coercion?
+		// TODO: ex. value: '1,2,3' or value: '1' -> auto coerce into an array?
+
+		if (!Array.isArray(value)) {
+			throw new JValidTypeError("array", `${field} must be an array.`);
+		}
+	},
+
 	number: (value, body, params, field, schema, options) => {
 		if (!value && !Number.isNaN(value)) return;
 
+		if (Number.isNaN(value)) {
+			throw new JValidTypeError(
+				"number",
+				`${field} must be a number but is NaN.`
+			);
+		}
+
 		if (options.typeCoercion) {
 			try {
-				const result = parseInt(value, 10);
+				const result = parseFloat(value, 10);
 
 				if (Number.isNaN(result)) {
 					// Will get caught below.
@@ -48,12 +68,17 @@ module.exports.filters = {
 			}
 		}
 
-		if (typeof value !== "number" || Number.isNaN(value)) {
-			throw new JValidTypeError("number", `${field} must be a number.`);
+		if (typeof value !== "number") {
+			throw new JValidTypeError(
+				"number",
+				`${field} must be a number but is ${typeof value}.`
+			);
 		}
 	},
 
 	max: (value, body, params, field, schema, options) => {
+		// TODO: How should we handle everything else (null, undefined, NaN, other types?)
+
 		if (typeof value === "string" && value.length > params[0]) {
 			throw new Error(
 				`${field} must be less than ${params[0]} characters in length.`
@@ -67,6 +92,26 @@ module.exports.filters = {
 		if (Array.isArray(value) && value.length > params[0]) {
 			throw new Error(
 				`${field} must be less than ${params[0]} items in length.`
+			);
+		}
+	},
+
+	min: (value, body, params, field, schema, options) => {
+		// TODO: How should we handle everything else (null, undefined, NaN, other types?)
+
+		if (typeof value === "string" && value.length < params[0]) {
+			throw new Error(
+				`${field} must be greater than than ${params[0]} characters in length.`
+			);
+		}
+
+		if (typeof value === "number" && value < params[0]) {
+			throw new Error(`${field} must be greater than than ${params[0]}.`);
+		}
+
+		if (Array.isArray(value) && value.length < params[0]) {
+			throw new Error(
+				`${field} must be greater than than ${params[0]} items in length.`
 			);
 		}
 	},

@@ -461,7 +461,7 @@ describe("Built-in validations", () => {
 		expect(result.errors[0]).toStrictEqual({
 			field: "numbers",
 			filter: "number",
-			message: "Field numbers is not an array.",
+			message: "Field numbers must be an array.",
 		});
 		expect(result.output).toStrictEqual(body);
 	});
