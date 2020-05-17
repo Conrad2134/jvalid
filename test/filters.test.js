@@ -94,4 +94,11 @@ describe("Filter validations", () => {
 			`"Could not coerce numberTextField value into a string."`
 		);
 	});
+
+	test.todo("processFilters");
+	test.todo("max");
+	test.todo("number");
+	test.todo("min");
+	test.todo("array");
+	test.todo("when (onlyIf)");
 });

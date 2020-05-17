@@ -182,7 +182,6 @@ class JValid {
 // TODO: Could we add options (like `autoPipe`) to our filters when they are initialized?
 // TODO: Would have to store them as objects with properties and a filter prop (which is the actual function).
 // TODO: Maybe a v2 thing.
-// TODO: For custom filters, should we pass in a `getDeep` method?
 // TODO: array type instead of any[] for that type of validation?
 // TODO: Would we want to pipe but not save the output?
 // TODO: What else do we want to throw in the errors that might be helpful? A filter stack trace?
