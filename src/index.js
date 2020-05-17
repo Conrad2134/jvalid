@@ -1,12 +1,12 @@
 const debug = require("debug")("jvalid");
+const set = require("lodash/set");
+const get = require("lodash/get");
 const {
 	JValidTypeError,
 	JValidRequiredError,
 	JValidFilterConflictError,
 } = require("./errors");
 const { filters: jValidFilters, processFilters } = require("./filters");
-const set = require("lodash/set");
-const get = require("lodash/get");
 
 const buildPath = (path, key, isIndex) =>
 	path ? `${path}${isIndex ? `[${key}]` : `.${key}`}` : key;
@@ -173,16 +173,15 @@ class JValid {
 // TODO: Could we 'precompile' schemas for better performance / bundle size?
 // TODO: Would love to make a wrapper for different frameworks. Vue, for example.
 // TODO: Node 12+ only right now. Once we figure out how to package it, we can do browsers.
-// TODO: Named parameters to filters? 'name:(formatted="Last name")'
 // TODO: `failFast` option.
 // TODO: Enhance the filter api - maybe object parameter rather than a long list?
 // TODO: Make it async.
 // TODO: Refactor.
-// TODO: Could we add options (like `autoPipe`) to our filters when they are initialized?
 // TODO: Would have to store them as objects with properties and a filter prop (which is the actual function).
 // TODO: Maybe a v2 thing.
 // TODO: Would we want to pipe but not save the output?
 // TODO: What else do we want to throw in the errors that might be helpful? A filter stack trace?
+// TODO: Update the debug statements to be more helpful.
 
 module.exports = {
 	JValid,
