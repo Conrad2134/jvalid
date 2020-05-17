@@ -88,7 +88,7 @@ class JValid {
 
 			debug("Validating:", `[${keyPath}, ${requestValue}]`);
 
-			if (get(request, keyPath)) {
+			if (get(originalRequest, keyPath)) {
 				// Only set the value if it exists in the request.
 				set(output, key, requestValue);
 			}
@@ -148,7 +148,7 @@ class JValid {
 					}
 				}, requestValue);
 
-				if (get(request, keyPath)) {
+				if (get(originalRequest, keyPath)) {
 					// Only set the value if it exists in the request.
 					set(output, key, fieldResult);
 				}

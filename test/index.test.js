@@ -465,6 +465,27 @@ describe("Built-in validations", () => {
 		expect(result.output).toStrictEqual(body);
 	});
 
+	test("Nested array value coercion", () => {
+		const schema = {
+			nested: {
+				numbers: "number[]",
+			},
+		};
+
+		const body = {
+			nested: {
+				numbers: [1, 2, "3"],
+			},
+		};
+
+		const validator = new JValid(schema, { typeCoercion: true });
+		const result = validator.validate(body);
+
+		expect(result.valid).toStrictEqual(true);
+		expect(result.errors).toHaveLength(0);
+		expect(result.output).toStrictEqual({ nested: { numbers: [1, 2, 3] } });
+	});
+
 	test.todo(
 		"filter in nested object where body is original request, not nested object. Same with schema."
 	);
