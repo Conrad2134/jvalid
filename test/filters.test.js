@@ -1,4 +1,4 @@
-const { filters } = require("../src/filters");
+const { filters, processFilters } = require("../src/filters");
 
 describe("Filter validations", () => {
 	test("required", () => {
@@ -317,5 +317,77 @@ describe("Filter validations", () => {
 		).not.toThrow();
 	});
 
-	test.todo("processFilters");
+	test("processFilters - simple", () => {
+		const singleResult = processFilters("first");
+		const multipleResult = processFilters("first|second");
+
+		expect(singleResult).toStrictEqual([
+			{ name: "first", params: [], pipe: false, array: false },
+		]);
+		expect(multipleResult).toStrictEqual([
+			{ name: "first", params: [], pipe: false, array: false },
+			{ name: "second", params: [], pipe: false, array: false },
+		]);
+	});
+
+	test("processFilters - pipes", () => {
+		const singlePipeResult = processFilters("first|>");
+		const multiplePipeResult = processFilters("first|>second");
+		const autoPipeResult = processFilters("number");
+
+		expect(singlePipeResult).toStrictEqual([
+			{ name: "first", params: [], pipe: true, array: false },
+		]);
+		expect(multiplePipeResult).toStrictEqual([
+			{ name: "first", params: [], pipe: true, array: false },
+			{ name: "second", params: [], pipe: false, array: false },
+		]);
+		expect(autoPipeResult).toStrictEqual([
+			{ name: "number", params: [], pipe: true, array: false },
+		]);
+	});
+
+	test("processFilters - array", () => {
+		const singleArrayResult = processFilters("first[]");
+
+		expect(singleArrayResult).toStrictEqual([
+			{ name: "first", params: [], pipe: false, array: true },
+		]);
+	});
+
+	test("processFilters - params", () => {
+		// TODO: See note in function code - can we coerce this to a number?
+		const singleParamResult = processFilters("first(5)");
+		const multipleParamsResult = processFilters("first(5,7)");
+
+		expect(singleParamResult).toStrictEqual([
+			{ name: "first", params: ["5"], pipe: false, array: false },
+		]);
+		expect(multipleParamsResult).toStrictEqual([
+			{ name: "first", params: ["5", "7"], pipe: false, array: false },
+		]);
+	});
+
+	test("processFilters - everything", () => {
+		const arrayWithMultipleParamsResult = processFilters("first[](5,7)");
+		const pipedArrayWithParamResult = processFilters("first[](5)|>");
+		const pipedWithParamsResult = processFilters("first(5)|>second");
+		const multipleMaxFilterResult = processFilters("number[]|max[](5)|max(3)");
+
+		expect(arrayWithMultipleParamsResult).toStrictEqual([
+			{ name: "first", params: ["5", "7"], pipe: false, array: true },
+		]);
+		expect(pipedArrayWithParamResult).toStrictEqual([
+			{ name: "first", params: ["5"], pipe: true, array: true },
+		]);
+		expect(pipedWithParamsResult).toStrictEqual([
+			{ name: "first", params: ["5"], pipe: true, array: false },
+			{ name: "second", params: [], pipe: false, array: false },
+		]);
+		expect(multipleMaxFilterResult).toStrictEqual([
+			{ name: "number", params: [], pipe: true, array: true },
+			{ name: "max", params: ["5"], pipe: false, array: true },
+			{ name: "max", params: ["3"], pipe: false, array: false },
+		]);
+	});
 });

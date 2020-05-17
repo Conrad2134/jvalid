@@ -147,6 +147,7 @@ module.exports.processFilters = (filters) => {
 			}
 		}
 
+		// TODO: Can we coerce the values into the right types for params?
 		const params = rawParams ? rawParams.split(",") : [];
 		let pipe = false;
 		let array = false;

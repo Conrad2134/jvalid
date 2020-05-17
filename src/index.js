@@ -182,6 +182,7 @@ class JValid {
 // TODO: Would we want to pipe but not save the output?
 // TODO: What else do we want to throw in the errors that might be helpful? A filter stack trace?
 // TODO: Update the debug statements to be more helpful.
+// TODO: Filter params coercion.
 
 module.exports = {
 	JValid,
