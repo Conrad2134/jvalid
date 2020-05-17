@@ -175,14 +175,12 @@ class JValid {
 // TODO: Node 12+ only right now. Once we figure out how to package it, we can do browsers.
 // TODO: Named parameters to filters? 'name:(formatted="Last name")'
 // TODO: `failFast` option.
-// TODO: `onlyIf` filter to reference other pieces of data.
 // TODO: Enhance the filter api - maybe object parameter rather than a long list?
 // TODO: Make it async.
 // TODO: Refactor.
 // TODO: Could we add options (like `autoPipe`) to our filters when they are initialized?
 // TODO: Would have to store them as objects with properties and a filter prop (which is the actual function).
 // TODO: Maybe a v2 thing.
-// TODO: array type instead of any[] for that type of validation?
 // TODO: Would we want to pipe but not save the output?
 // TODO: What else do we want to throw in the errors that might be helpful? A filter stack trace?
 

@@ -317,6 +317,5 @@ describe("Filter validations", () => {
 		).not.toThrow();
 	});
 
-	test.todo("when (onlyIf)");
 	test.todo("processFilters");
 });
