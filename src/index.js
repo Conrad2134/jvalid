@@ -164,7 +164,17 @@ class JValid {
   }
 }
 
-// TODO: Need a better way to format error messages from built-in filters.
+// TODO: Need a better way to format error messages from built-in filters, custom error messages.
+// TODO: Could we 'precompile' schemas for better performance / bundle size?
+// TODO: Would love to make a wrapper for different frameworks. Vue, for example.
+// TODO: Node 12+ only right now. Once we figure out how to package it, we can do browsers.
+// TODO: Named parameters to filters? 'name:(formatted="Last name")'
+// TODO: `failFast` option.
+// TODO: `onlyIf` filter to reference other pieces of data.
+// TODO: Enhance the filter api - maybe object parameter rather than a long list?
+// TODO: Make it async.
+// TODO: Finish the tests so that we can refactor.
+// TODO: Refactor.
 
 module.exports = {
   JValid,
