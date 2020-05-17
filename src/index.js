@@ -36,6 +36,8 @@ class JValid {
 	}
 
 	_validate(schema, request, originalRequest, originalSchema, path = "") {
+		debug(`Validating path: ${path || "(root)"}`);
+
 		let isValid = true;
 		let errors = [];
 		let output = {};
@@ -85,8 +87,6 @@ class JValid {
 				return;
 			}
 
-			debug("Validating:", `[${keyPath}, ${requestValue}]`);
-
 			if (get(originalRequest, keyPath)) {
 				// Only set the value if it exists in the request.
 				set(output, key, requestValue);
@@ -94,11 +94,10 @@ class JValid {
 
 			try {
 				const fieldFilters = processFilters(value);
-				debug("processing", fieldFilters);
 				const fieldResult = fieldFilters.reduce((passedValue, filter) => {
-					try {
-						debug("filter:", filter.name + ", params:", filter.params);
+					debug(`Processing filter: ${filter.name} for ${keyPath}`);
 
+					try {
 						if (filter.array) {
 							if (!Array.isArray(passedValue)) {
 								throw new JValidTypeError(
@@ -168,20 +167,6 @@ class JValid {
 		return this._validate(this.schema, request, request, this.schema);
 	}
 }
-
-// TODO: Need a better way to format error messages from built-in filters, custom error messages.
-// TODO: Could we 'precompile' schemas for better performance / bundle size?
-// TODO: Would love to make a wrapper for different frameworks. Vue, for example.
-// TODO: Node 12+ only right now. Once we figure out how to package it, we can do browsers.
-// TODO: `failFast` option.
-// TODO: Enhance the filter api - maybe object parameter rather than a long list?
-// TODO: Make it async.
-// TODO: Refactor.
-// TODO: Would have to store them as objects with properties and a filter prop (which is the actual function).
-// TODO: Maybe a v2 thing.
-// TODO: Would we want to pipe but not save the output?
-// TODO: What else do we want to throw in the errors that might be helpful? A filter stack trace?
-// TODO: Update the debug statements to be more helpful.
 
 module.exports = {
 	JValid,
