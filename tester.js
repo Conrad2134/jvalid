@@ -96,7 +96,7 @@ validator.registerFilter('name', nameFilter);
 validator.registerFilter('onlyIf', onlyIf);
 validator.registerFilter('math', math);
 
-// const result = validator.validate(badRequest);
-const result = validator.validate(goodRequest);
+const result = validator.validate(badRequest);
+// const result = validator.validate(goodRequest);
 
 console.log(JSON.stringify(result, null, 2));
