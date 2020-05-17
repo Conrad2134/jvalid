@@ -1,14 +1,14 @@
-const { JValid } = require('../src/index');
-const { JValidFilterConflictError } = require('../src/errors');
+const { JValid } = require("../src/index");
+const { JValidFilterConflictError } = require("../src/errors");
 
-describe('Built-in validations', () => {
-	test('Single property - passing', () => {
+describe("Built-in validations", () => {
+	test("Single property - passing", () => {
 		const schema = {
-			name: 'string',
+			name: "string",
 		};
 
 		const body = {
-			name: 'Michael Scott',
+			name: "Michael Scott",
 		};
 
 		const validator = new JValid(schema);
@@ -19,13 +19,13 @@ describe('Built-in validations', () => {
 		expect(result.output).toStrictEqual(body);
 	});
 
-	test('Single property - failing', () => {
+	test("Single property - failing", () => {
 		const schema = {
-			name: 'number',
+			name: "number",
 		};
 
 		const body = {
-			name: 'Michael Scott',
+			name: "Michael Scott",
 		};
 
 		const validator = new JValid(schema);
@@ -37,15 +37,15 @@ describe('Built-in validations', () => {
 		expect(result.output).toStrictEqual(body);
 	});
 
-	test('Multiple properties, multiple filters - passing', () => {
+	test("Multiple properties, multiple filters - passing", () => {
 		const schema = {
-			name: 'string|required|max:15',
-			age: 'number|required|max:99',
-			retirementAge: 'number|max:75',
+			name: "string|required|max(15)",
+			age: "number|required|max(99)",
+			retirementAge: "number|max(75)",
 		};
 
 		const body = {
-			name: 'Michael Scott',
+			name: "Michael Scott",
 			age: 50,
 		};
 
@@ -57,15 +57,15 @@ describe('Built-in validations', () => {
 		expect(result.output).toStrictEqual(body);
 	});
 
-	test('Multiple properties, multiple filters - failing', () => {
+	test("Multiple properties, multiple filters - failing", () => {
 		const schema = {
-			name: 'string|required|max:15',
-			age: 'number|required|max:99',
-			retirementAge: 'number|max:75',
+			name: "string|required|max(15)",
+			age: "number|required|max(99)",
+			retirementAge: "number|max(75)",
 		};
 
 		const body = {
-			name: 'Michael Gary Scott',
+			name: "Michael Gary Scott",
 			retirementAge: 88,
 		};
 
@@ -78,13 +78,13 @@ describe('Built-in validations', () => {
 		expect(result.output).toStrictEqual(body);
 	});
 
-	test('Additional properties fails validation, not included in output', () => {
+	test("Additional properties fails validation, not included in output", () => {
 		const schema = {
-			name: 'string|required',
+			name: "string|required",
 		};
 
 		const body = {
-			name: 'Michael Gary Scott',
+			name: "Michael Gary Scott",
 			age: 50,
 		};
 
@@ -97,13 +97,13 @@ describe('Built-in validations', () => {
 		expect(result.output).toStrictEqual({ name: body.name });
 	});
 
-	test('Additional properties allowed, included in output', () => {
+	test("Additional properties allowed, included in output", () => {
 		const schema = {
-			name: 'string|required',
+			name: "string|required",
 		};
 
 		const body = {
-			name: 'Michael Gary Scott',
+			name: "Michael Gary Scott",
 			age: 50,
 		};
 
@@ -115,13 +115,13 @@ describe('Built-in validations', () => {
 		expect(result.output).toStrictEqual(body);
 	});
 
-	test('Type coercion - off fails validation', () => {
+	test("Type coercion - off fails validation", () => {
 		const schema = {
-			age: 'number|required',
+			age: "number|required",
 		};
 
 		const body = {
-			age: '50',
+			age: "50",
 		};
 
 		const validator = new JValid(schema, { typeCoercion: false });
@@ -133,13 +133,13 @@ describe('Built-in validations', () => {
 		expect(result.output).toStrictEqual(body);
 	});
 
-	test('Type coercion - on coerces values', () => {
+	test("Type coercion - on coerces values", () => {
 		const schema = {
-			age: 'number|required',
+			age: "number|required",
 		};
 
 		const body = {
-			age: '50',
+			age: "50",
 		};
 
 		const validator = new JValid(schema, { typeCoercion: true });
@@ -150,15 +150,15 @@ describe('Built-in validations', () => {
 		expect(result.output).toStrictEqual({ age: 50 });
 	});
 
-	test('custom filter', () => {
+	test("custom filter", () => {
 		const options = {
 			typeCoercion: false,
 			additionalProperties: false,
 		};
 
 		const schema = {
-			passing: 'passing',
-			failing: 'failing',
+			passing: "passing",
+			failing: "failing",
 		};
 
 		const body = {
@@ -177,20 +177,20 @@ describe('Built-in validations', () => {
 			expect(value).toStrictEqual(body.passing);
 			expect(filterBody).toStrictEqual(body);
 			expect(params).toStrictEqual([]);
-			expect(field).toStrictEqual('passing');
+			expect(field).toStrictEqual("passing");
 			expect(validatorSchema).toStrictEqual(schema);
 			expect(validatorOptions).toStrictEqual(options);
 		};
 
 		const failingFilter = (value, body, params, field, schema, options) => {
-			throw new Error('failed');
+			throw new Error("failed");
 		};
 
 		const validator = new JValid(schema, options);
 
 		validator.registerFilters([
-			{ name: 'passing', filter: passingFilter },
-			{ name: 'failing', filter: failingFilter },
+			{ name: "passing", filter: passingFilter },
+			{ name: "failing", filter: failingFilter },
 		]);
 
 		const result = validator.validate(body);
@@ -201,24 +201,24 @@ describe('Built-in validations', () => {
 		expect(result.output).toStrictEqual(body);
 	});
 
-	test('Custom filter conflict', () => {
+	test("Custom filter conflict", () => {
 		const validator = new JValid({});
 
-		expect(() => validator.registerFilter('required')).toThrow(
+		expect(() => validator.registerFilter("required")).toThrow(
 			JValidFilterConflictError
 		);
 	});
 
-	test('Simple validation, nested object, passing', () => {
+	test("Simple validation, nested object, passing", () => {
 		const schema = {
 			name: {
-				first: 'string',
+				first: "string",
 			},
 		};
 
 		const body = {
 			name: {
-				first: 'Michael',
+				first: "Michael",
 			},
 		};
 
@@ -230,11 +230,11 @@ describe('Built-in validations', () => {
 		expect(result.output).toStrictEqual(body);
 	});
 
-	test('Simple validation, deeply nested object, passing', () => {
+	test("Simple validation, deeply nested object, passing", () => {
 		const schema = {
 			request: {
 				name: {
-					first: 'string',
+					first: "string",
 				},
 			},
 		};
@@ -242,7 +242,7 @@ describe('Built-in validations', () => {
 		const body = {
 			request: {
 				name: {
-					first: 'Michael',
+					first: "Michael",
 				},
 			},
 		};
@@ -255,16 +255,16 @@ describe('Built-in validations', () => {
 		expect(result.output).toStrictEqual(body);
 	});
 
-	test('Simple validation, nested object, failing', () => {
+	test("Simple validation, nested object, failing", () => {
 		const schema = {
 			name: {
-				first: 'number',
+				first: "number",
 			},
 		};
 
 		const body = {
 			name: {
-				first: 'Michael',
+				first: "Michael",
 			},
 		};
 
@@ -274,18 +274,18 @@ describe('Built-in validations', () => {
 		expect(result.valid).toStrictEqual(false);
 		expect(result.errors).toHaveLength(1);
 		expect(result.errors[0]).toStrictEqual({
-			field: 'name.first',
-			filter: 'number',
-			message: 'Could not coerce name.first value into a number.',
+			field: "name.first",
+			filter: "number",
+			message: "Could not coerce name.first value into a number.",
 		});
 		expect(result.output).toStrictEqual(body);
 	});
 
-	test('Simple validation, deeply nested object, failing', () => {
+	test("Simple validation, deeply nested object, failing", () => {
 		const schema = {
 			request: {
 				name: {
-					first: 'number',
+					first: "number",
 				},
 			},
 		};
@@ -293,7 +293,7 @@ describe('Built-in validations', () => {
 		const body = {
 			request: {
 				name: {
-					first: 'Michael',
+					first: "Michael",
 				},
 			},
 		};
@@ -304,18 +304,18 @@ describe('Built-in validations', () => {
 		expect(result.valid).toStrictEqual(false);
 		expect(result.errors).toHaveLength(1);
 		expect(result.errors[0]).toStrictEqual({
-			field: 'request.name.first',
-			filter: 'number',
-			message: 'Could not coerce request.name.first value into a number.',
+			field: "request.name.first",
+			filter: "number",
+			message: "Could not coerce request.name.first value into a number.",
 		});
 		expect(result.output).toStrictEqual(body);
 	});
 
-	test('Simple validation, deeply nested object, additonal properties, failing', () => {
+	test("Simple validation, deeply nested object, additonal properties, failing", () => {
 		const schema = {
 			request: {
 				name: {
-					first: 'string',
+					first: "string",
 				},
 			},
 		};
@@ -323,12 +323,12 @@ describe('Built-in validations', () => {
 		const body = {
 			request: {
 				name: {
-					first: 'Michael',
-					last: 'Scott',
+					first: "Michael",
+					last: "Scott",
 				},
-				age: '50',
+				age: "50",
 			},
-			extra: 'prop',
+			extra: "prop",
 		};
 
 		const validator = new JValid(schema, { additionalProperties: false });
@@ -337,7 +337,7 @@ describe('Built-in validations', () => {
 		expect(result.valid).toStrictEqual(false);
 		expect(result.errors).toHaveLength(3);
 		expect(result.errors[2]).toStrictEqual({
-			field: 'request.name.last',
+			field: "request.name.last",
 			message:
 				"Field 'request.name.last' does not exist in schema and additional properties are not allowed.",
 		});
@@ -346,9 +346,9 @@ describe('Built-in validations', () => {
 		});
 	});
 
-	test('simple validation, array, passing', () => {
+	test("simple validation, array, passing", () => {
 		const schema = {
-			numbers: 'number[]',
+			numbers: "number[]",
 		};
 
 		const body = {
@@ -363,13 +363,13 @@ describe('Built-in validations', () => {
 		expect(result.output).toStrictEqual(body);
 	});
 
-	test('simple validation, array, failing, item value type', () => {
+	test("simple validation, array, failing, item value type", () => {
 		const schema = {
-			numbers: 'number[]',
+			numbers: "number[]",
 		};
 
 		const body = {
-			numbers: [1, 2, 'three'],
+			numbers: [1, 2, "three"],
 		};
 
 		const validator = new JValid(schema);
@@ -378,20 +378,20 @@ describe('Built-in validations', () => {
 		expect(result.valid).toStrictEqual(false);
 		expect(result.errors).toHaveLength(1);
 		expect(result.errors[0]).toStrictEqual({
-			field: 'numbers',
-			filter: 'number',
-			message: 'Could not coerce numbers[2] value into a number.',
+			field: "numbers",
+			filter: "number",
+			message: "Could not coerce numbers[2] value into a number.",
 		});
 		expect(result.output).toStrictEqual(body);
 	});
 
-	test('Array item value type coercion', () => {
+	test("Array item value type coercion", () => {
 		const schema = {
-			numbers: 'number[]',
+			numbers: "number[]",
 		};
 
 		const body = {
-			numbers: [1, 2, '3'],
+			numbers: [1, 2, "3"],
 		};
 
 		const validator = new JValid(schema, { typeCoercion: true });
@@ -402,11 +402,11 @@ describe('Built-in validations', () => {
 		expect(result.output).toStrictEqual({ numbers: [1, 2, 3] });
 	});
 
-	test('Non-type validation, array, passing', () => {
+	test("Non-type validation, array, passing", () => {
 		const schema = {
 			// TODO: Document potential gotcha. If you omit the [], you're checking length of the array and not each item.
 			// TODO: It's pretty sweet though that you can apply the [] syntax to any filter.
-			numbers: 'max[]:30',
+			numbers: "max[](30)",
 		};
 
 		const body = {
@@ -421,9 +421,9 @@ describe('Built-in validations', () => {
 		expect(result.output).toStrictEqual(body);
 	});
 
-	test('Non-type validation, array, failing', () => {
+	test("Non-type validation, array, failing", () => {
 		const schema = {
-			numbers: 'max[]:30',
+			numbers: "max[](30)",
 		};
 
 		const body = {
@@ -436,16 +436,16 @@ describe('Built-in validations', () => {
 		expect(result.valid).toStrictEqual(false);
 		expect(result.errors).toHaveLength(1);
 		expect(result.errors[0]).toStrictEqual({
-			field: 'numbers',
-			filter: 'max',
-			message: 'numbers[2] must be less than 30.',
+			field: "numbers",
+			filter: "max",
+			message: "numbers[2] must be less than 30.",
 		});
 		expect(result.output).toStrictEqual(body);
 	});
 
-	test('simple validation, array, failing, value type is not array', () => {
+	test("simple validation, array, failing, value type is not array", () => {
 		const schema = {
-			numbers: 'number[]',
+			numbers: "number[]",
 		};
 
 		const body = {
@@ -458,20 +458,20 @@ describe('Built-in validations', () => {
 		expect(result.valid).toStrictEqual(false);
 		expect(result.errors).toHaveLength(1);
 		expect(result.errors[0]).toStrictEqual({
-			field: 'numbers',
-			filter: 'number',
-			message: 'Field numbers is not an array.',
+			field: "numbers",
+			filter: "number",
+			message: "Field numbers is not an array.",
 		});
 		expect(result.output).toStrictEqual(body);
 	});
 
 	test.todo(
-		'filter in nested object where body is original request, not nested object. Same with schema.'
+		"filter in nested object where body is original request, not nested object. Same with schema."
 	);
-	test.todo('error types');
-	test.todo('multiple params for filters');
-	test.todo('pipe operator');
+	test.todo("error types");
+	test.todo("multiple params for filters");
+	test.todo("pipe operator");
 	test.todo(
-		'named params? if we want to do that for v1. At least think about the api and if it would be breaking'
+		"named params? if we want to do that for v1. At least think about the api and if it would be breaking"
 	);
 });

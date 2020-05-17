@@ -1,75 +1,75 @@
-const { filters } = require('../src/filters');
+const { filters } = require("../src/filters");
 
-describe('Filter validations', () => {
-	test('required', () => {
+describe("Filter validations", () => {
+	test("required", () => {
 		expect(() =>
-			filters.required(null, null, null, 'nullField', null, null)
+			filters.required(null, null, null, "nullField", null, null)
 		).toThrowErrorMatchingInlineSnapshot(`"nullField is required."`);
 
 		expect(() =>
-			filters.required(undefined, null, null, 'undefField', null, null)
+			filters.required(undefined, null, null, "undefField", null, null)
 		).toThrowErrorMatchingInlineSnapshot(`"undefField is required."`);
 
 		expect(() =>
-			filters.required(NaN, null, null, 'NaNField', null, null)
+			filters.required(NaN, null, null, "NaNField", null, null)
 		).toThrowErrorMatchingInlineSnapshot(`"NaNField is required."`);
 
 		expect(() =>
-			filters.required('', null, null, 'emptyStringField', null, null)
+			filters.required("", null, null, "emptyStringField", null, null)
 		).toThrowErrorMatchingInlineSnapshot(`"emptyStringField is required."`);
 
 		expect(() =>
-			filters.required(0, null, null, 'zeroField', null, null)
+			filters.required(0, null, null, "zeroField", null, null)
 		).not.toThrow();
 
 		expect(() =>
-			filters.required(55, null, null, 'numberField', null, null)
+			filters.required(55, null, null, "numberField", null, null)
 		).not.toThrow();
 
 		expect(() =>
-			filters.required('hello', null, null, 'stringField', null, null)
+			filters.required("hello", null, null, "stringField", null, null)
 		).not.toThrow();
 	});
 
-	test('string', () => {
+	test("string", () => {
 		expect(
-			filters.string(null, null, null, 'nullField', null, null)
+			filters.string(null, null, null, "nullField", null, null)
 		).toStrictEqual(undefined);
 
 		expect(
-			filters.string(undefined, null, null, 'undefField', null, null)
+			filters.string(undefined, null, null, "undefField", null, null)
 		).toStrictEqual(undefined);
 
 		expect(
-			filters.string('', null, null, 'emptyStringField', null, {
+			filters.string("", null, null, "emptyStringField", null, {
 				typeCoercion: false,
 			})
 		).toStrictEqual(undefined);
 
 		expect(() =>
-			filters.string(0, null, null, 'zeroField', null, { typeCoercion: false })
+			filters.string(0, null, null, "zeroField", null, { typeCoercion: false })
 		).toThrowErrorMatchingInlineSnapshot(`"zeroField must be a string."`);
 
 		expect(() =>
-			filters.string(50, null, null, 'numberStrField', null, {
+			filters.string(50, null, null, "numberStrField", null, {
 				typeCoercion: false,
 			})
 		).toThrowErrorMatchingInlineSnapshot(`"numberStrField must be a string."`);
 
 		expect(
-			filters.string(50, null, null, 'numberStrField', null, {
+			filters.string(50, null, null, "numberStrField", null, {
 				typeCoercion: true,
 			})
-		).toStrictEqual('50');
+		).toStrictEqual("50");
 
 		expect(
-			filters.string('string', null, null, 'stringField', null, {
+			filters.string("string", null, null, "stringField", null, {
 				typeCoercion: true,
 			})
-		).toStrictEqual('string');
+		).toStrictEqual("string");
 
 		expect(
-			filters.string('string', null, null, 'stringField', null, {
+			filters.string("string", null, null, "stringField", null, {
 				typeCoercion: false,
 			})
 		).toStrictEqual(undefined);
@@ -84,7 +84,7 @@ describe('Filter validations', () => {
 				},
 				null,
 				null,
-				'numberTextField',
+				"numberTextField",
 				null,
 				{
 					typeCoercion: true,

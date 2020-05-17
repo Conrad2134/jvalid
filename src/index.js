@@ -1,12 +1,12 @@
-const debug = require('debug')('jvalid');
+const debug = require("debug")("jvalid");
 const {
 	JValidTypeError,
 	JValidRequiredError,
 	JValidFilterConflictError,
-} = require('./errors');
-const { filters: jValidFilters, processFilters } = require('./filters');
-const setValue = require('set-value');
-const getValue = require('get-value');
+} = require("./errors");
+const { filters: jValidFilters, processFilters } = require("./filters");
+const set = require("lodash/set");
+const get = require("lodash/get");
 
 const buildPath = (path, key, isIndex) =>
 	path ? `${path}${isIndex ? `[${key}]` : `.${key}`}` : key;
@@ -36,7 +36,7 @@ class JValid {
 		this.filters[name] = filter;
 	}
 
-	_validate(schema, request, originalRequest, originalSchema, path = '') {
+	_validate(schema, request, originalRequest, originalSchema, path = "") {
 		let isValid = true;
 		let errors = [];
 		let output = {};
@@ -55,7 +55,7 @@ class JValid {
 					message: `Field '${keyPath}' does not exist in schema and additional properties are not allowed.`,
 				});
 			} else {
-				setValue(output, key, value);
+				set(output, key, value);
 			}
 		});
 
@@ -66,9 +66,9 @@ class JValid {
 
 			// If it's an object, we're nested.
 			if (
-				typeof requestValue === 'object' &&
+				typeof requestValue === "object" &&
 				requestValue !== null &&
-				typeof requestValue.length === 'undefined'
+				typeof requestValue.length === "undefined"
 			) {
 				const result = this._validate(
 					value,
@@ -80,25 +80,25 @@ class JValid {
 
 				isValid = isValid && result.valid;
 				errors = errors.concat(result.errors);
-				setValue(output, key, result.output);
+				set(output, key, result.output);
 
 				// Move on to the next one.
 				return;
 			}
 
-			debug('Validating:', `[${keyPath}, ${requestValue}]`);
+			debug("Validating:", `[${keyPath}, ${requestValue}]`);
 
-			if (getValue(request, keyPath)) {
+			if (get(request, keyPath)) {
 				// Only set the value if it exists in the request.
-				setValue(output, key, requestValue);
+				set(output, key, requestValue);
 			}
 
 			try {
 				const fieldFilters = processFilters(value);
-				debug('processing', fieldFilters);
+				debug("processing", fieldFilters);
 				const fieldResult = fieldFilters.reduce((passedValue, filter) => {
 					try {
-						debug('filter:', filter.name + ', params:', filter.params);
+						debug("filter:", filter.name + ", params:", filter.params);
 
 						if (filter.array) {
 							if (!Array.isArray(passedValue)) {
@@ -148,9 +148,9 @@ class JValid {
 					}
 				}, requestValue);
 
-				if (getValue(request, keyPath)) {
+				if (get(request, keyPath)) {
 					// Only set the value if it exists in the request.
-					setValue(output, key, fieldResult);
+					set(output, key, fieldResult);
 				}
 			} catch (err) {
 				isValid = false;
@@ -186,7 +186,6 @@ class JValid {
 // TODO: Maybe a v2 thing.
 // TODO: For custom filters, should we pass in a `getDeep` method?
 // TODO: array type instead of any[] for that type of validation?
-// TODO: Use get/set deep libraries that support index notation.
 // TODO: Would we want to pipe but not save the output?
 // TODO: What else do we want to throw in the errors that might be helpful? A filter stack trace?
 
