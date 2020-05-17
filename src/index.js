@@ -187,6 +187,7 @@ class JValid {
 // TODO: For custom filters, should we pass in a `getDeep` method?
 // TODO: array type instead of any[] for that type of validation?
 // TODO: Use get/set deep libraries that support index notation.
+// TODO: Would we want to pipe but not save the output?
 
 module.exports = {
 	JValid,

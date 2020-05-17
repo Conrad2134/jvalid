@@ -21,10 +21,32 @@ const onlyIf = (value, body, params, field, schema, options) => {
 	}
 };
 
+const math = (value, body, params, field, schema, options) => {
+	const [operator, ...args] = params;
+	let final = value;
+
+	args.map(Number).forEach((arg) => {
+		if (operator === '*') {
+			final *= arg;
+		} else if (operator === '/') {
+			final /= arg;
+		} else if (operator === '+') {
+			final += arg;
+		} else if (operator === '-') {
+			final -= arg;
+		} else {
+			throw new Error(`Operator '${operator}' is not supported.`);
+		}
+	});
+
+	return final;
+};
+
 const schema = {
 	firstName: 'string|required|max:30',
 	lastName: 'name',
 	age: 'number|required',
+	quadrupled: 'number|math:*,2,2|>max:50',
 	address: {
 		line1: 'string|required|max:60',
 		line2: 'string|onlyIf:address.line1|max:60',
@@ -39,6 +61,7 @@ const badRequest = {
 	firstName: 'Bobbyreallylongnamewhichisover30characters',
 	lastName: 'Newport',
 	age: '33',
+	quadrupled: 20,
 	additionalProp: 'fake',
 	address: {
 		line2: 'where is line 1?',
@@ -53,6 +76,7 @@ const goodRequest = {
 	firstName: 'Bobby',
 	lastName: 'Newport',
 	age: '33',
+	quadrupled: 10,
 	address: {
 		line1: 'Right here',
 		line2: 'where is line 1?',
@@ -70,8 +94,9 @@ const validator = new JValid(schema, options);
 
 validator.registerFilter('name', nameFilter);
 validator.registerFilter('onlyIf', onlyIf);
+validator.registerFilter('math', math);
 
-const result = validator.validate(badRequest);
-// const result = validator.validate(goodRequest);
+// const result = validator.validate(badRequest);
+const result = validator.validate(goodRequest);
 
-console.log(result.valid ? 'Hooray!' : JSON.stringify(result, null, 2));
+console.log(JSON.stringify(result, null, 2));
