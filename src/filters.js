@@ -79,7 +79,7 @@ module.exports.typeFilters = typeFilters;
 module.exports.processFilters = (filters) => {
 	const processed = [];
 
-	filters.split("|").forEach((filter, index) => {
+	filters.split("|").forEach((filter, index, filterList) => {
 		const filterRegex = /(>)?([a-z]*)(\[\])?(\((.*)\))?/i;
 		let [
 			raw,
@@ -90,14 +90,21 @@ module.exports.processFilters = (filters) => {
 			rawParams,
 		] = filter.match(filterRegex);
 
-		const params = rawParams ? rawParams.split(",") : [];
-		let pipe = false;
-		let array = false;
-
 		if (previousIsPipe) {
 			// Previous filter should pipe to this one.
 			processed[index - 1].pipe = true;
+
+			// If we don't find a name and this is the end of the filter list,
+			// pipe the last filter to output and exit.
+			// Ex. number: "double|>"
+			if (!name && index === filterList.length - 1) {
+				return;
+			}
 		}
+
+		const params = rawParams ? rawParams.split(",") : [];
+		let pipe = false;
+		let array = false;
 
 		if (isArray) {
 			array = true;

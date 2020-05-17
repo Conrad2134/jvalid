@@ -486,6 +486,50 @@ describe("Built-in validations", () => {
 		expect(result.output).toStrictEqual({ nested: { numbers: [1, 2, 3] } });
 	});
 
+	test("Custom pipe filter - multiple", () => {
+		const double = (value) => {
+			return value * 2;
+		};
+
+		const schema = {
+			numbers: "double[]|>number[]",
+		};
+
+		const body = {
+			numbers: [1, 2, 3],
+		};
+
+		const validator = new JValid(schema, { typeCoercion: true });
+		validator.registerFilter("double", double);
+		const result = validator.validate(body);
+
+		expect(result.valid).toStrictEqual(true);
+		expect(result.errors).toHaveLength(0);
+		expect(result.output).toStrictEqual({ numbers: [2, 4, 6] });
+	});
+
+	test("Custom pipe filter - single", () => {
+		const double = (value) => {
+			return value * 2;
+		};
+
+		const schema = {
+			numbers: "double[]|>",
+		};
+
+		const body = {
+			numbers: [1, 2, 3],
+		};
+
+		const validator = new JValid(schema, { typeCoercion: true });
+		validator.registerFilter("double", double);
+		const result = validator.validate(body);
+
+		expect(result.valid).toStrictEqual(true);
+		expect(result.errors).toHaveLength(0);
+		expect(result.output).toStrictEqual({ numbers: [2, 4, 6] });
+	});
+
 	test.todo(
 		"filter in nested object where body is original request, not nested object. Same with schema."
 	);

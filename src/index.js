@@ -17,11 +17,10 @@ const defaultOptions = {
 };
 
 class JValid {
-	filters = jValidFilters;
-
 	constructor(schema, options = {}) {
 		this.schema = schema;
 		this.options = { ...defaultOptions, ...options };
+		this.filters = { ...jValidFilters };
 	}
 
 	registerFilters(filters) {
