@@ -157,13 +157,14 @@ describe("Built-in validations", () => {
 		};
 
 		const schema = {
-			passing: "passing",
-			failing: "failing",
+			nested: {
+				passing: "passing",
+				failing: "failing",
+			},
 		};
 
 		const body = {
-			passing: 50,
-			failing: 60,
+			nested: { passing: 50, failing: 60 },
 		};
 
 		const passingFilter = (
@@ -174,10 +175,10 @@ describe("Built-in validations", () => {
 			validatorSchema,
 			validatorOptions
 		) => {
-			expect(value).toStrictEqual(body.passing);
+			expect(value).toStrictEqual(body.nested.passing);
 			expect(filterBody).toStrictEqual(body);
 			expect(params).toStrictEqual([]);
-			expect(field).toStrictEqual("passing");
+			expect(field).toStrictEqual("nested.passing");
 			expect(validatorSchema).toStrictEqual(schema);
 			expect(validatorOptions).toStrictEqual(options);
 		};
@@ -530,13 +531,25 @@ describe("Built-in validations", () => {
 		expect(result.output).toStrictEqual({ numbers: [2, 4, 6] });
 	});
 
-	test.todo(
-		"filter in nested object where body is original request, not nested object. Same with schema."
-	);
-	test.todo("error types");
-	test.todo("multiple params for filters");
-	test.todo("pipe operator");
-	test.todo(
-		"named params? if we want to do that for v1. At least think about the api and if it would be breaking"
-	);
+	test("Multiple params", () => {
+		const multiply = (value, body, params) => {
+			return params.reduce((accum, num) => accum * num, value);
+		};
+
+		const schema = {
+			numbers: "multiply[](2, 2, 2)|>",
+		};
+
+		const body = {
+			numbers: [1, 2, 3],
+		};
+
+		const validator = new JValid(schema, { typeCoercion: true });
+		validator.registerFilter("multiply", multiply);
+		const result = validator.validate(body);
+
+		expect(result.valid).toStrictEqual(true);
+		expect(result.errors).toHaveLength(0);
+		expect(result.output).toStrictEqual({ numbers: [8, 16, 24] });
+	});
 });

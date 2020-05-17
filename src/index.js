@@ -178,7 +178,6 @@ class JValid {
 // TODO: `onlyIf` filter to reference other pieces of data.
 // TODO: Enhance the filter api - maybe object parameter rather than a long list?
 // TODO: Make it async.
-// TODO: Finish the tests so that we can refactor.
 // TODO: Refactor.
 // TODO: Could we add options (like `autoPipe`) to our filters when they are initialized?
 // TODO: Would have to store them as objects with properties and a filter prop (which is the actual function).
