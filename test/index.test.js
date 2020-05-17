@@ -509,12 +509,12 @@ describe("Built-in validations", () => {
 	});
 
 	test("Custom pipe filter - single", () => {
-		const double = (value) => {
-			return value * 2;
+		const multiply = (value, body, params) => {
+			return value * params[0];
 		};
 
 		const schema = {
-			numbers: "double[]|>",
+			numbers: "multiply[](2)|>",
 		};
 
 		const body = {
@@ -522,7 +522,7 @@ describe("Built-in validations", () => {
 		};
 
 		const validator = new JValid(schema, { typeCoercion: true });
-		validator.registerFilter("double", double);
+		validator.registerFilter("multiply", multiply);
 		const result = validator.validate(body);
 
 		expect(result.valid).toStrictEqual(true);
