@@ -25,7 +25,7 @@ const math = (value, body, params, field, schema, options) => {
 	const [operator, ...args] = params;
 	let final = value;
 
-	args.map(Number).forEach((arg) => {
+	args.forEach((arg) => {
 		if (operator === "*") {
 			final *= arg;
 		} else if (operator === "/") {
@@ -46,10 +46,10 @@ const schema = {
 	firstName: "string|required|max(30)",
 	lastName: "name",
 	age: "number|required",
-	quadrupled: "number|math(*,2,2)|>max(50)",
+	quadrupled: "number|math('*',2,2)|>max(50)",
 	address: {
 		line1: "string|required|max(60)",
-		line2: "string|onlyIf(address.line1)|max(60)",
+		line2: "string|onlyIf('address.line1')|max(60)",
 	},
 	awards: {
 		// Array of numbers, none can be over 2020, max length of 3.
