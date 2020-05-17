@@ -356,15 +356,22 @@ describe("Filter validations", () => {
 	});
 
 	test("processFilters - params", () => {
-		// TODO: See note in function code - can we coerce this to a number?
-		const singleParamResult = processFilters("first(5)");
-		const multipleParamsResult = processFilters("first(5,7)");
+		const singleParamNumResult = processFilters("first(5)");
+		const singleParamBacktickStrResult = processFilters("first(`five`)");
+		const singleParamDoubleQuoteStrResult = processFilters('first("five")');
+		const multipleParamsSingleQuoteResult = processFilters("first(5,'7')");
 
-		expect(singleParamResult).toStrictEqual([
-			{ name: "first", params: ["5"], pipe: false, array: false },
+		expect(singleParamNumResult).toStrictEqual([
+			{ name: "first", params: [5], pipe: false, array: false },
 		]);
-		expect(multipleParamsResult).toStrictEqual([
-			{ name: "first", params: ["5", "7"], pipe: false, array: false },
+		expect(singleParamBacktickStrResult).toStrictEqual([
+			{ name: "first", params: ["five"], pipe: false, array: false },
+		]);
+		expect(singleParamDoubleQuoteStrResult).toStrictEqual([
+			{ name: "first", params: ["five"], pipe: false, array: false },
+		]);
+		expect(multipleParamsSingleQuoteResult).toStrictEqual([
+			{ name: "first", params: [5, "7"], pipe: false, array: false },
 		]);
 	});
 
@@ -375,19 +382,19 @@ describe("Filter validations", () => {
 		const multipleMaxFilterResult = processFilters("number[]|max[](5)|max(3)");
 
 		expect(arrayWithMultipleParamsResult).toStrictEqual([
-			{ name: "first", params: ["5", "7"], pipe: false, array: true },
+			{ name: "first", params: [5, 7], pipe: false, array: true },
 		]);
 		expect(pipedArrayWithParamResult).toStrictEqual([
-			{ name: "first", params: ["5"], pipe: true, array: true },
+			{ name: "first", params: [5], pipe: true, array: true },
 		]);
 		expect(pipedWithParamsResult).toStrictEqual([
-			{ name: "first", params: ["5"], pipe: true, array: false },
+			{ name: "first", params: [5], pipe: true, array: false },
 			{ name: "second", params: [], pipe: false, array: false },
 		]);
 		expect(multipleMaxFilterResult).toStrictEqual([
 			{ name: "number", params: [], pipe: true, array: true },
-			{ name: "max", params: ["5"], pipe: false, array: true },
-			{ name: "max", params: ["3"], pipe: false, array: false },
+			{ name: "max", params: [5], pipe: false, array: true },
+			{ name: "max", params: [3], pipe: false, array: false },
 		]);
 	});
 });

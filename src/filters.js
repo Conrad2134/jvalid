@@ -126,6 +126,8 @@ module.exports.processFilters = (filters) => {
 
 	filters.split("|").forEach((filter, index, filterList) => {
 		const filterRegex = /(>)?([a-z]*)(\[\])?(\((.*)\))?/i;
+		const isQuotedRegex = /['`"](.*)['`"]/i;
+
 		let [
 			raw,
 			previousIsPipe,
@@ -147,8 +149,22 @@ module.exports.processFilters = (filters) => {
 			}
 		}
 
-		// TODO: Can we coerce the values into the right types for params?
-		const params = rawParams ? rawParams.split(",") : [];
+		let params = rawParams ? rawParams.split(",") : [];
+
+		// TODO: This is kind of a messy way of doing this.
+		params = params.map((param) => {
+			if (isQuotedRegex.test(param)) {
+				return param.slice(1, param.length - 1);
+			}
+
+			try {
+				return parseFloat(param, 10);
+			} catch {
+				// TODO: debug statements.
+				return param;
+			}
+		});
+
 		let pipe = false;
 		let array = false;
 
