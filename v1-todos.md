@@ -1,0 +1,2 @@
+- Enum filter? Would be nice to be able to pass arrays as params, in addition to strings and numbers.
+- API for throwing errors.

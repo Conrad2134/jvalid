@@ -35,6 +35,8 @@ class JValid {
 		this.filters[name] = filter;
 	}
 
+	// TODO: Would rather not have to pass all this stuff like this.
+	// TODO: Also want options (like throw instead of collect and return).
 	_validate(schema, request, originalRequest, originalSchema, path = "") {
 		debug(`Validating path: ${path || "(root)"}`);
 

@@ -2,8 +2,11 @@
 	"name": "jvalid",
 	"version": "0.1.0",
 	"license": "MIT",
-	"main": "./src/index.js",
+	"source": "./src/index.js",
+	"main": "dist/jvalid.umd.js",
+	"module": "dist/jvalid.module.js",
 	"scripts": {
+		"build": "microbundle -f modern,umd",
 		"test": "jest"
 	},
 	"dependencies": {
@@ -12,6 +15,7 @@
 	},
 	"devDependencies": {
 		"jest": "^26.0.1",
+		"microbundle": "^0.12.0",
 		"prettier": "^2.0.5"
 	}
 }
