@@ -1,5 +1,5 @@
-const { JValid } = require("../src/index");
-const { JValidFilterConflictError } = require("../src/errors");
+import { JValid } from "../src/index";
+import { JValidFilterConflictError } from "../src/errors";
 
 describe("Built-in validations", () => {
 	test("Single property - passing", () => {

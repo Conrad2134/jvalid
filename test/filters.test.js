@@ -1,4 +1,4 @@
-const { filters, processFilters } = require("../src/filters");
+import { filters, processFilters } from "../src/filters";
 
 describe("Filter validations", () => {
 	test("required", () => {

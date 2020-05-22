@@ -14,6 +14,9 @@
 		"lodash": "^4.17.15"
 	},
 	"devDependencies": {
+		"@babel/core": "^7.9.6",
+		"@babel/preset-env": "^7.9.6",
+		"babel-jest": "^26.0.1",
 		"jest": "^26.0.1",
 		"microbundle": "^0.12.0",
 		"prettier": "^2.0.5"

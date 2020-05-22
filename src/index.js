@@ -1,12 +1,14 @@
-const debug = require("debug")("jvalid");
-const set = require("lodash/set");
-const get = require("lodash/get");
-const {
+import Debug from "debug";
+import set from "lodash/set";
+import get from "lodash/get";
+import {
 	JValidTypeError,
 	JValidRequiredError,
 	JValidFilterConflictError,
-} = require("./errors");
-const { filters: jValidFilters, processFilters } = require("./filters");
+} from "./errors";
+import { filters as jValidFilters, processFilters } from "./filters";
+
+const debug = Debug("jvalid");
 
 const buildPath = (path, key, isIndex) =>
 	path ? `${path}${isIndex ? `[${key}]` : `.${key}`}` : key;
@@ -170,8 +172,4 @@ class JValid {
 	}
 }
 
-module.exports = {
-	JValid,
-	JValidTypeError,
-	JValidRequiredError,
-};
+export { JValid, JValidTypeError, JValidRequiredError };

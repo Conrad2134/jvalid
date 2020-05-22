@@ -1,6 +1,6 @@
-const { JValidRequiredError, JValidTypeError } = require("./errors");
+import { JValidRequiredError, JValidTypeError } from "./errors";
 
-module.exports.filters = {
+export const filters = {
 	required: (value, body, params, field, schema, options) => {
 		if (!value && value !== 0) {
 			throw new JValidRequiredError(field);
@@ -117,11 +117,9 @@ module.exports.filters = {
 	},
 };
 
-const typeFilters = ["string", "number"];
+export const typeFilters = ["string", "number"];
 
-module.exports.typeFilters = typeFilters;
-
-module.exports.processFilters = (filters) => {
+export const processFilters = (filters) => {
 	const processed = [];
 
 	filters.split("|").forEach((filter, index, filterList) => {

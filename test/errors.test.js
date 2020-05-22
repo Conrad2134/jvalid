@@ -1,8 +1,8 @@
-const {
+import {
 	JValidRequiredError,
 	JValidTypeError,
 	JValidFilterConflictError,
-} = require("../src/errors");
+} from "../src/errors";
 
 describe("Custom errors", () => {
 	test("JValidRequiredError", () => {
